@@ -1,11 +1,11 @@
-from fastapi import Request
+import requests
 
 base_url = "http://localhost:8000/api/v1" 
 
 # Negative Case
 def test_failed_get_all_room_with_empty_data():
     # Exec
-    response = Request.get(f"{base_url}/rooms")
+    response = requests.get(f"{base_url}/rooms")
     data = response.json()
 
     # Check Default Response
@@ -22,7 +22,7 @@ def test_failed_get_all_room_with_empty_data():
 # Positive Case
 def test_success_get_all_room_with_valid_data():
     # Exec
-    response = Request.get(f"{base_url}/rooms")
+    response = requests.get(f"{base_url}/rooms")
     data = response.json()
 
     # Check Default Response
