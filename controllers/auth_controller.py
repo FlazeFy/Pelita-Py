@@ -77,7 +77,13 @@ def controller_refresh_auth_token(request: Request):
     # Get Auth Token
     refresh_token = request.headers.get("Authorization")
     if not refresh_token or not refresh_token.startswith("Bearer "):
-        return 401, "invalid refresh token", None
+        return JSONResponse(
+            status_code=401,
+            content={
+                "message": "invalid refresh token",
+                "status": "failed",
+            },
+        )
     
     # Service
     status_code, message, data = service_refresh_auth_token(refresh_token)
