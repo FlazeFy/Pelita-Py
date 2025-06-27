@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, Request
 from sqlalchemy.orm import Session
 # Controllers
-from controllers.auth_controller import controller_register_user, controller_login_user, get_db, controller_refresh_auth_token, controller_check_account_via_telegram, UserCreate, UserLogin, UserCheckAccViaTelegram
+from controllers.auth_controller import controller_register_user, controller_login_user, get_db, controller_refresh_auth_token, UserCreate, UserLogin
 
 router_auth = APIRouter()
 
@@ -15,17 +15,6 @@ router_auth = APIRouter()
                     "example": {
                         "message": "user registered successfully",
                         "status": "success",
-                    }
-                }
-            },
-        },
-        404: {
-            "description": "User not found",
-            "content": {
-                "application/json": {
-                    "example": {
-                        "message": "user not found",
-                        "status": "failed",
                     }
                 }
             },
@@ -55,7 +44,7 @@ router_auth = APIRouter()
                 "application/json": {
                     "example": {
                         "message": "something went wrong",
-                        "status": "failed",
+                        "status": "error",
                     }
                 }
             },
@@ -83,7 +72,7 @@ def router_register(user: UserCreate, db: Session = Depends(get_db)):
             },
         },
         401: {
-            "description": "Invalid username or password",
+            "description": "invalid username or password",
             "content": {
                 "application/json": {
                     "example": {
@@ -107,7 +96,7 @@ def router_register(user: UserCreate, db: Session = Depends(get_db)):
                 "application/json": {
                     "example": {
                         "message": "something went wrong",
-                        "status": "failed",
+                        "status": "error",
                     }
                 }
             },
@@ -146,12 +135,12 @@ def router_login(user: UserLogin, db: Session = Depends(get_db)):
                 "application/json": {
                     "example": {
                         "message": "something went wrong",
-                        "status": "failed",
+                        "status": "error",
                     }
                 }
             },
         },
     },
 )
-def router_refresh(request: Request, db: Session = Depends(get_db)):
-    return controller_refresh_auth_token(request, db)
+def router_refresh(request: Request):
+    return controller_refresh_auth_token(request)

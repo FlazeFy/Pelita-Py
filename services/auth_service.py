@@ -1,91 +1,68 @@
+import bcrypt
 from passlib.context import CryptContext
 from datetime import timedelta
-from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
 from fastapi import Request
 import jwt
-# Utils
-from utils.jwt import create_auth_token, decode_auth_token
 # Repositories
-from repositories.auth_repository import repository_check_user_exists, repository_create_user, repository_get_user_by_username
-from repositories.user_repository import repository_get_user_by_username_telegram_id
-# Models
-from models.users_model import UserCheckAccViaTelegram
+from repositories.auth_repository import repository_find_user_by_email_username, repository_create_user, repository_find_user_by_username
+# Utils
+from utils.jwt_util import create_auth_token, decode_auth_token
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 def service_register_user(username: str, email: str, password: str, telegram_user_id:str, db: Session):
-    if repository_check_user_exists(db, username=username, email=email):
-        return JSONResponse(
-            status_code=409,
-            content={
-                "message": "the email or username already been used. try using other",
-                "status": "failed",
-            },
-        )
-    hashed_password = pwd_context.hash(password)
-    repository_create_user(db, username, email, telegram_user_id, hashed_password)
-    return JSONResponse(
-        status_code=201,
-        content={"message": "user registered successfully", "status": "success"},
-    )
-
+    try:
+        # Repo : Find User By Email and Username
+        if repository_find_user_by_email_username(db, username=username, email=email):
+            return 409, "the email or username already been used. try using other"
+        
+        # Hash Password
+        hashed_password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
+        
+        # Repo : Create User
+        repository_create_user(db, username, email, telegram_user_id, hashed_password)
+        
+        return 201, "user registered successfully"
+    except Exception as err:
+        return 500, "something went wrong"
 
 def service_login_user(username: str, password: str, db: Session):
-    db_user = repository_get_user_by_username(db, username)
-    if not db_user or not pwd_context.verify(password, db_user.password):
-        return JSONResponse(
-            status_code=401,
-            content={"message": "invalid username or password", "status": "failed"},
-        )
-    data = {"sub": db_user.username, "id": db_user.id}
-    access_token = create_auth_token(data, expires_delta=timedelta(hours=1))
-    refresh_token = create_auth_token(data, expires_delta=timedelta(hours=7))
-    return JSONResponse(
-        status_code=200,
-        content={
-            "access_token": access_token,
-            "refresh_token": refresh_token,
-            "message": "user login successfully",
-            "status": "success",
-        },
-    )
-
-def service_refresh_auth_token(request: Request):
     try:
-        refresh_token = request.headers.get("Authorization")
-        if not refresh_token or not refresh_token.startswith("Bearer "):
-            return JSONResponse(
-                status_code=401,
-                content={"message": "invalid refresh token", "status": "failed"},
-            )
+        # Repo : Find User By Username
+        db_user = repository_find_user_by_username(db, username)
+
+        # Validate Password
+        if not db_user or not bcrypt.checkpw(password.encode('utf-8'), db_user.password.encode('utf-8')):
+            return 401, "invalid username or password", None, None
+        
+        # Create Auth Token
+        data = {"sub": db_user.username, "id": db_user.id}
+        access_token = create_auth_token(data, expires_delta=timedelta(hours=24))
+        refresh_token = create_auth_token(data, expires_delta=timedelta(days=7))
+
+        return 200, "user login successfully", access_token, refresh_token
+    except Exception as err:
+        return 500, err.args, None, None
+
+def service_refresh_auth_token(refresh_token: str):
+    try:
+        # Decode Token
         refresh_token = refresh_token.split(" ")[1]
         payload = decode_auth_token(refresh_token)
         username = payload.get("sub")
         data = payload.get("id")
+
         if not username:
-            return JSONResponse(
-                status_code=401,
-                content={"message": "invalid token", "status": "failed"},
-            )
+            return 401, "invalid token", None
+        
+        # Create Auth Token
         new_access_token = create_auth_token(
-            {"sub": username,  "id": data.id}, expires_delta=timedelta(hours=1)
+            {"sub": username,  "id": data}, expires_delta=timedelta(days=7)
         )
-        return JSONResponse(
-            status_code=200,
-            content={
-                "access_token": new_access_token,
-                "message": "user token refresh",
-                "status": "success",
-            },
-        )
+
+        return 200, "user token refresh", new_access_token
     except (jwt.ExpiredSignatureError, jwt.PyJWTError):
-        return JSONResponse(
-            status_code=401,
-            content={"message": "invalid token", "status": "failed"},
-        )
-    except Exception:
-        return JSONResponse(
-            status_code=500,
-            content={"message": "something went wrong", "status": "failed"},
-        )
+        return 401, "invalid token", None
+    except Exception as err:
+        return 500, "something went wrong", None

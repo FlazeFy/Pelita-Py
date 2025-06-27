@@ -1,5 +1,6 @@
 from pydantic import BaseModel, EmailStr
-from sqlalchemy import Column, Integer, String, DateTime, func, Boolean
+from typing import Optional
+from sqlalchemy import Column, String, DateTime, func, Boolean
 from configs.database import Base
 from sqlalchemy.orm import Session
 
@@ -7,7 +8,7 @@ from sqlalchemy.orm import Session
 class UserCreate(BaseModel):
     username: str
     password: str
-    telegram_user_id: str
+    telegram_user_id: Optional[str] = None
     email: EmailStr
 
 class UserLogin(BaseModel):
@@ -19,7 +20,6 @@ class User(Base):
 
     id = Column(String(36), primary_key=True, index=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
-    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
     username = Column(String(50), unique=True, nullable=False)
     password = Column(String(255), nullable=False)
     telegram_user_id = Column(String(36), unique=True, nullable=True)
