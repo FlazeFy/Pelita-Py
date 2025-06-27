@@ -35,8 +35,10 @@ app.add_middleware(
 
 # Routes
 from routes.auth_route import router_auth
+from routes.room_route import router_rooms
 
 app.include_router(router_auth, prefix="/api/v1/auths", tags=["Auth"])
+app.include_router(router_rooms, prefix="/api/v1/rooms", tags=["Room"])
 
 # Landing
 @app.get("/")

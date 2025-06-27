@@ -5,7 +5,7 @@ from fastapi import Request
 from configs.database import SessionLocal
 # Services
 from services.auth_service import service_register_user, service_login_user, service_refresh_auth_token
-from models.users_model import UserCreate, UserLogin
+from models.user_model import UserCreate, UserLogin
 
 def get_db():
     db = SessionLocal()

@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy import select
 from typing import Union
 # Models
-from models.users_model import User, is_username_or_email_taken
+from models.user_model import User, is_username_or_email_taken
 # Utils
 from utils.generator_util import get_UUID
 
