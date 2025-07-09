@@ -2,6 +2,7 @@ import requests
 
 base_url = "http://localhost:8000/api/v1" 
 
+# API GET : Get All Room
 # Negative Case
 def test_failed_get_all_room_with_empty_data():
     # Exec
@@ -41,3 +42,91 @@ def test_success_get_all_room_with_valid_data():
     for dt in data['data']:
         for col in string_col:
             assert isinstance(dt[col], str), f"The key '{col}' should be a string"
+
+# API Post : Create Room
+def test_failed_post_create_room_with_empty_room_name():
+    # Payload
+    payload = {
+        'floor' : '9A',
+        'room_name' : '',
+        'room_dept' : 'IT'
+    }
+
+    # Exec
+    response = requests.post(f"{base_url}/rooms", json=payload)
+    data = response.json()
+
+    # Check Default Response
+    assert response.status_code == 422
+    assert data['status'] == 'failed'
+    assert isinstance(data['detail'], list), f"The key 'data' should be a list"
+
+    # Check Validation Message
+    assert data['detail'][0]['type'] == 'missing'
+    assert data['detail'][0]['loc'][0] == 'body'
+    assert data['detail'][0]['loc'][1] == 'room_name'
+    assert data['detail'][0]['msg'] == 'Field required'
+
+def test_failed_post_create_room_with_invalid_char_length_room_name():
+    # Payload
+    payload = {
+        'floor' : '9A',
+        'room_name' : 'Lorem ipsum dolor sit amet consectetur adipiscing elit Quisque faucibus ex sapien vitae pellentesque sem placerat',
+        'room_dept' : 'IT'
+    }
+    
+    # Exec
+    response = requests.post(f"{base_url}/rooms", json=payload)
+    data = response.json()
+
+    # Check Default Response
+    assert response.status_code == 422
+    assert data['status'] == 'failed'
+
+    # Check Validation Message
+    assert data['message'] == 'invalid room_name'
+
+def test_failed_post_create_room_with_invalid_rules_room_dept():
+    # Payload
+    payload = {
+        'floor' : '9A',
+        'room_name' : 'Room A',
+        'room_dept' : 'Room B'
+    }
+
+    # Exec
+    response = requests.post(f"{base_url}/rooms", json=payload)
+    data = response.json()
+
+    # Check Default Response
+    assert response.status_code == 422
+    assert data['status'] == 'failed'
+
+    # Check Validation Message
+    assert data['message'] == 'invalid room_dept'
+
+def test_success_post_create_room_with_valid_data():
+    # Payload
+    payload = {
+        'floor' : '9A',
+        'room_name' : 'Pantry',
+        'room_dept' : 'IT'
+    }
+
+    # Exec
+    response = requests.post(f"{base_url}/rooms", json=payload)
+    data = response.json()
+
+    # Check Default Response
+    assert response.status_code == 201
+    assert data['status'] == 'success'
+    assert isinstance(data['data'], object), f"The key 'data' should be a object"
+
+    # Check Data
+    assert data['data']['floor'] == payload['floor']
+    assert data['data']['room_name'] == payload['room_name']
+    assert data['data']['room_dept'] == payload['room_dept']
+    assert isinstance(data['data']['id'], str), f"The key 'id' should be string"
+    assert isinstance(data['data']['created_at'], str), f"The key 'created_at' should be string"
+    
+
