@@ -9,3 +9,4 @@ RESPONSE_MESSAGES = {
     "sign out": "signed out",
     "empty": "not found",
 }
+ROOM_DEPT_RULES = ["IT", "Human Resource", "Finance & Risk Management", "Marketing", "Sales", "Planning & Transformation", "Network"]

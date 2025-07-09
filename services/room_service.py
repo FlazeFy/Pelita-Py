@@ -1,5 +1,9 @@
 from requests import Session
-from repositories.room_repository import repository_find_all_room
+
+# Model
+from models.room_model import SaveRoom
+# Repository
+from repositories.room_repository import repository_find_all_room, repository_create_room
 
 def service_get_all_room(db: Session):
     # Repo : Find All Room
@@ -9,3 +13,12 @@ def service_get_all_room(db: Session):
         return 404, None
 
     return 200, rooms
+
+def service_create_room(data: SaveRoom):
+    # Repo : Create Room
+    room = repository_create_room(data)
+
+    if not room: 
+        return 500, None
+    
+    return 201, room
