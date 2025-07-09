@@ -1,6 +1,12 @@
 from sqlalchemy import Column, String, DateTime, func
 from configs.database import Base
-    
+from pydantic import BaseModel
+
+class SaveRoom(BaseModel):
+    floor: str
+    room_name: str
+    room_dept: str
+
 class Room(Base):
     __tablename__ = "rooms"
 

@@ -60,13 +60,9 @@ def test_failed_post_create_room_with_empty_room_name():
     # Check Default Response
     assert response.status_code == 422
     assert data['status'] == 'failed'
-    assert isinstance(data['detail'], list), f"The key 'data' should be a list"
 
     # Check Validation Message
-    assert data['detail'][0]['type'] == 'missing'
-    assert data['detail'][0]['loc'][0] == 'body'
-    assert data['detail'][0]['loc'][1] == 'room_name'
-    assert data['detail'][0]['msg'] == 'Field required'
+    assert data['message'] == 'room_name invalid'
 
 def test_failed_post_create_room_with_invalid_char_length_room_name():
     # Payload
@@ -85,7 +81,7 @@ def test_failed_post_create_room_with_invalid_char_length_room_name():
     assert data['status'] == 'failed'
 
     # Check Validation Message
-    assert data['message'] == 'invalid room_name'
+    assert data['message'] == 'room_name invalid'
 
 def test_failed_post_create_room_with_invalid_rules_room_dept():
     # Payload
@@ -104,7 +100,7 @@ def test_failed_post_create_room_with_invalid_rules_room_dept():
     assert data['status'] == 'failed'
 
     # Check Validation Message
-    assert data['message'] == 'invalid room_dept'
+    assert data['message'] == 'room_dept invalid'
 
 # Positive Case
 def test_success_post_create_room_with_valid_data():

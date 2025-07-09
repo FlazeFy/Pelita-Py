@@ -1,6 +1,13 @@
-from sqlalchemy import select
+from datetime import datetime
+from sqlalchemy import select, insert
 from sqlalchemy.orm import Session
-from models.room_model import Room
+
+# Configs
+from configs.database import engine
+# Model
+from models.room_model import Room, SaveRoom
+# Util
+from utils.generator_util import get_UUID
 
 def repository_find_all_room(db: Session):
     # Query
@@ -14,7 +21,34 @@ def repository_find_all_room(db: Session):
     result = db.execute(query).scalars().all()
     return result
 
-def repository_create_room(data: Room) -> dict:
-    result = None
+def repository_create_room(data: SaveRoom) -> dict:
+    room_id = get_UUID()
+    created_at = datetime.utcnow()
 
-    return result
+    # Query
+    query = insert(Room).values(
+        id = room_id,
+        floor = data.floor,
+        room_name = data.room_name,
+        room_dept = data.room_dept,
+        created_at = created_at
+    )
+
+    with engine.connect() as conn:
+        trans = conn.begin()
+        try:
+            # Exec
+            result = conn.execute(query)
+            trans.commit()
+            
+            if result.rowcount > 0:
+                response_data = data.dict()
+                response_data.update({
+                    "id": room_id,
+                    "created_at": created_at.isoformat()
+                })
+
+                return response_data
+        except Exception:
+            trans.rollback()
+            raise

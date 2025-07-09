@@ -12,7 +12,7 @@ from controllers.auth_controller import get_db
 # Utils
 from utils.converter_util import model_to_dict
 # Model 
-from models.room_model import Room
+from models.room_model import SaveRoom
 
 # Repo Find All Room
 # Positive Case
@@ -48,29 +48,31 @@ def test_success_repository_find_all_room_with_valid_data():
 
 # Repo Create Room
 # Positive Case
+@pytest.mark.asyncio
 async def test_success_repository_create_room_with_valid_data():
     # Test Data
-    payload = Room(
+    payload = SaveRoom(
         floor = "4",
         room_name = "Room A",
         room_dept = "IT"
     )
 
     # Exec
-    result = await repository_create_room(payload)
+    result = repository_create_room(payload)
 
     # Assert 
     assert isinstance(result, dict)
-    assert result['floor'] == payload['floor']
-    assert result['room_name'] == payload['room_name']
-    assert result['room_dept'] == payload['room_dept']
+    assert result['floor'] == payload.floor
+    assert result['room_name'] == payload.room_name
+    assert result['room_dept'] == payload.room_dept
     assert isinstance(result['id'], str), f"The key 'id' should be string"
     assert isinstance(result['created_at'], str), f"The key 'created_at' should be string"
 
 # Negative Case
+@pytest.mark.asyncio
 async def test_failed_repository_create_room_with_invalid_data():
     # Test Data
-    payload = Room(
+    payload = SaveRoom(
         floor = "4",
         room_name = "Lorem ipsum dolor sit amet consectetur adipiscing elit Quisque faucibus ex sapien vitae pellentesque sem placerat",
         room_dept = "IT"
@@ -78,5 +80,5 @@ async def test_failed_repository_create_room_with_invalid_data():
 
     # Exec & Assert
     with pytest.raises(Exception):
-        await repository_create_room(payload)
+        repository_create_room(payload)
 
