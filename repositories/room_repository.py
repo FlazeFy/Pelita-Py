@@ -13,3 +13,8 @@ def repository_find_all_room(db: Session):
     # Exec
     result = db.execute(query).scalars().all()
     return result
+
+def repository_create_room(data: Room) -> dict:
+    result = None
+
+    return result

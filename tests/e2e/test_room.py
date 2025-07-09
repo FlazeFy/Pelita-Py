@@ -44,6 +44,7 @@ def test_success_get_all_room_with_valid_data():
             assert isinstance(dt[col], str), f"The key '{col}' should be a string"
 
 # API Post : Create Room
+# Negative Case
 def test_failed_post_create_room_with_empty_room_name():
     # Payload
     payload = {
@@ -105,6 +106,7 @@ def test_failed_post_create_room_with_invalid_rules_room_dept():
     # Check Validation Message
     assert data['message'] == 'invalid room_dept'
 
+# Positive Case
 def test_success_post_create_room_with_valid_data():
     # Payload
     payload = {
