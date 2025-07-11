@@ -1,5 +1,5 @@
 from datetime import datetime
-from sqlalchemy import select, insert
+from sqlalchemy import select, insert, delete
 from sqlalchemy.orm import Session
 
 # Configs
@@ -49,6 +49,21 @@ def repository_create_room(data: SaveRoom) -> dict:
                 })
 
                 return response_data
+        except Exception:
+            trans.rollback()
+            raise
+
+def repository_delete_room_by_id(room_id: str) -> bool:
+    query = delete(Room).where(
+        Room.id == room_id
+    )
+
+    with engine.connect() as conn:
+        trans = conn.begin()
+        try:
+            result = conn.execute(query)
+            trans.commit()
+            return result.rowcount > 0
         except Exception:
             trans.rollback()
             raise

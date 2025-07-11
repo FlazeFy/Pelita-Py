@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 from requests import Session
 # Controllers
-from controllers.room_controller import controller_get_all_room, controller_post_create_room
+from controllers.room_controller import controller_get_all_room, controller_post_create_room, controller_delete_room_by_id
 from controllers.auth_controller import get_db
 from models.room_model import SaveRoom
 
@@ -104,5 +104,54 @@ def router_get_all_room(db: Session = Depends(get_db)):
 def router_post_create_room(data: SaveRoom):
     try:
         return controller_post_create_room(data)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+    
+@router_rooms.delete("/{room_id}",response_model=dict,summary="Delete Room By Id",tags=["Room"],status_code=200,
+    description="This request is used to permanentally delete room",
+    responses={
+        200: {
+            "description": "success delete room by id",
+            "content": {
+                "application/json": {
+                    "example": {
+                        "message": "room permanently deleted",
+                        "status": "success"
+                    }
+                }
+            },
+        },
+        400: {
+            "description": "failed fetch not found",
+            "content": {
+                "application/json": {
+                    "example": {"message": "invalid room_id", "status": "failed"}
+                }
+            },
+        },
+        404: {
+            "description": "failed find room",
+            "content": {
+                "application/json": {
+                    "example": {"message": "room not found", "status": "failed"}
+                }
+            },
+        },
+        500: {
+            "description": "Internal server error",
+            "content": {
+                "application/json": {
+                    "example": {
+                        "message": "something went wrong",
+                        "status": "error",
+                    }
+                }
+            },
+        },
+    },
+)
+def router_delete_room_by_id(room_id: str):
+    try:
+        return controller_delete_room_by_id(room_id)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
