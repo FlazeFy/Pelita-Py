@@ -142,11 +142,11 @@ def test_failed_delete_room_by_id_with_invalid_uuid():
     assert data['status'] == 'failed'
 
     # Check Validation Message
-    assert data['message'] == 'id must be valid UUID'
+    assert data['message'] == 'room_id invalid'
 
 def test_failed_delete_room_by_id_with_invalid_id():
     # Test Data
-    id = "0123da31-ab12-3238-0ez2-a241c68cb20e"
+    id = "42a5609c-427a-e5f0-1cb4-0386171ba521"
 
     # Exec
     response = requests.delete(f"{base_url}/rooms/{id}")

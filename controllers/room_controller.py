@@ -5,11 +5,11 @@ from configs.const import ROOM_DEPT_RULES
 # Model
 from models.room_model import SaveRoom
 # Services
-from services.room_service import service_get_all_room, service_create_room
+from services.room_service import service_get_all_room, service_create_room, service_delete_room_by_id
 # Utils
 from utils.converter_util import format_list_of_dict_with_datetime, model_to_dict
 from utils.response_util import build_response
-from utils.validator_util import validate_target_in_rules, validate_char_length
+from utils.validator_util import validate_target_in_rules, validate_char_length, validate_uuid_format
 
 def controller_get_all_room(db: Session):
     # Service : Get All Room
@@ -26,7 +26,7 @@ def controller_get_all_room(db: Session):
     )
 
 def controller_post_create_room(data: SaveRoom):
-    # Validator Lenght
+    # Validator Length
     if not validate_char_length(data.floor, 1, 2):
         return build_response(422, "failed", "floor", "invalid", None)
     if not validate_char_length(data.room_name, 2, 36):
@@ -49,4 +49,20 @@ def controller_post_create_room(data: SaveRoom):
         "room",
         "post",
         data_final
+    )
+
+def controller_delete_room_by_id(room_id: str):
+    # Validator UUID Format
+    if not validate_uuid_format(room_id):
+        return build_response(400, "failed", "room_id", "invalid", None)
+    
+    # Service : Delete Room By Id
+    is_success = service_delete_room_by_id(room_id)
+
+    return build_response(
+        200 if is_success else 404,
+        "success" if is_success else "failed", 
+        "room",
+        "hard delete" if is_success else "empty",
+        None
     )

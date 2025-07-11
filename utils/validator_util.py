@@ -1,3 +1,6 @@
+import uuid
+
+
 def validate_target_in_rules(target: str, rules: list[str]) -> bool:
     return target.lower() in [rule.lower() for rule in rules]
 
@@ -14,4 +17,11 @@ def validate_char_length(data: str, min: int = None, max: int = None) -> bool:
 
     return True
 
-
+def validate_uuid_format(data: str) -> bool:
+    if not isinstance(data, str):
+        return False
+    try:
+        uuid_obj = uuid.UUID(data)
+        return str(uuid_obj) == data.lower()
+    except ValueError:
+        return False

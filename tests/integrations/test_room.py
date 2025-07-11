@@ -113,5 +113,5 @@ async def test_failed_repository_delete_room_by_id_with_invalid_id():
 @pytest.mark.asyncio
 async def test_failed_repository_delete_room_by_id_with_invalid_id_type():
     with pytest.raises(Exception):
-        repository_delete_room_by_id(12345)
+        repository_delete_room_by_id([1,2])
 
