@@ -127,4 +127,51 @@ def test_success_post_create_room_with_valid_data():
     assert isinstance(data['data']['id'], str), f"The key 'id' should be string"
     assert isinstance(data['data']['created_at'], str), f"The key 'created_at' should be string"
     
+# API Post : Delete Room By Id
+# Negative Case
+def test_failed_delete_room_by_id_with_invalid_uuid():
+    # Test Data
+    id = "1234"
+
+    # Exec
+    response = requests.delete(f"{base_url}/rooms/{id}")
+    data = response.json()
+
+    # Check Default Response
+    assert response.status_code == 400
+    assert data['status'] == 'failed'
+
+    # Check Validation Message
+    assert data['message'] == 'id must be valid UUID'
+
+def test_failed_delete_room_by_id_with_invalid_id():
+    # Test Data
+    id = "0123da31-ab12-3238-0ez2-a241c68cb20e"
+
+    # Exec
+    response = requests.delete(f"{base_url}/rooms/{id}")
+    data = response.json()
+
+    # Check Default Response
+    assert response.status_code == 404
+    assert data['status'] == 'failed'
+
+    # Check Validation Message
+    assert data['message'] == 'room not found'
+
+# Positive Case
+def test_success_delete_room_by_id_with_valid_id():
+    # Test Data
+    id = "0965da31-de86-3238-0e89-a241c68cb63e"
+
+    # Exec
+    response = requests.delete(f"{base_url}/rooms/{id}")
+    data = response.json()
+
+    # Check Default Response
+    assert response.status_code == 200
+    assert data['status'] == 'success'
+
+    # Check Validation Message
+    assert data['message'] == 'room permanently deleted'
 
