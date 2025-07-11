@@ -1,12 +1,13 @@
 from datetime import datetime
 import sys
 import os
+from uuid import uuid4
 import pytest
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../../')))
 from sqlalchemy.orm import Session
 
 # Repository
-from repositories.room_repository import repository_find_all_room, repository_create_room
+from repositories.room_repository import repository_find_all_room, repository_create_room, repository_delete_room_by_id
 # Controller
 from controllers.auth_controller import get_db
 # Utils
@@ -81,4 +82,36 @@ async def test_failed_repository_create_room_with_invalid_data():
     # Exec & Assert
     with pytest.raises(Exception):
         repository_create_room(payload)
+
+# Repo Delete Room By ID
+# Positive Case
+@pytest.mark.asyncio
+async def test_success_repository_delete_room_by_id_with_valid_id():
+    payload = SaveRoom(
+        floor="2",
+        room_name="Temp Room",
+        room_dept="QA"
+    )
+
+    # Repo Create Room
+    created_room = repository_create_room(payload)
+    room_id = created_room['id']
+
+    # Repo Delete Room
+    deleted = repository_delete_room_by_id(room_id)
+
+    assert deleted is True
+
+# Negative Case
+@pytest.mark.asyncio
+async def test_failed_repository_delete_room_by_id_with_invalid_id():
+    random_id = str(uuid4())
+    deleted = repository_delete_room_by_id(random_id)
+
+    assert deleted is False
+
+@pytest.mark.asyncio
+async def test_failed_repository_delete_room_by_id_with_invalid_id_type():
+    with pytest.raises(Exception):
+        repository_delete_room_by_id(12345)
 

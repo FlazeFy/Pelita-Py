@@ -52,3 +52,7 @@ def repository_create_room(data: SaveRoom) -> dict:
         except Exception:
             trans.rollback()
             raise
+
+def repository_delete_room_by_id(room_id: str) -> bool:
+
+    return None
